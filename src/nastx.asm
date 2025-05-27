@@ -67,7 +67,7 @@ MAKE_OFFSET_TAB .R, .R, 12, 8
 
 %assign i 0
 %rep 8
-	F_TWORD_MEMCPY_ZX_TAB2TAB %1, SAVE.R, i, %2, X87DUMP.R, i
+	F_TWORD_MEMCPY_ZX_TAB2TAB %1, SAVE.R, i, %1, X87DUMP.R, i
 %assign i i+1
 %endrep
 %endmacro
