@@ -94,8 +94,8 @@ MAKE_OFFSET_TAB .R, .R, 12, 8
 
 
 section .rodata
-fmt_stack_register_value:	db "|ST(%u)|%22.8Lg|", 10, 0
-fmt_stack_register_empty:	db "|ST(%u)|                   ...|", 10, 0
+fmt_stack_register_value:	db "|ST%u|%26.8Lg|", 10, 0
+fmt_stack_register_empty:	db "|ST%u|                       ...|", 10, 0
 
 fmt:				db "%x%x%x", 10, 0
 
