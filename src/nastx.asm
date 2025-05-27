@@ -66,7 +66,7 @@ MAKE_OFFSET_TAB .R, .R, 12, 8
 	mov dword [%1 + X87DUMP.FDP + 4], eax
 
 %assign i 0
-%rep
+%rep 8
 	F_TWORD_MEMCPY_ZX_TAB2TAB %1, SAVE.R, i, %2, X87DUMP.R, i
 %assign i i+1
 %endrep
@@ -86,7 +86,7 @@ MAKE_OFFSET_TAB .R, .R, 12, 8
 	F_EXPAND_SAVE_TO_X87DUMP esp+4
 %endmacro
 
-%macro F_LEAVE_DUMP
+%macro F_LEAVE_DUMP 0
 	mov edi, dword [ebp-8]
 	mov esi, dword [ebp-4]
 	leave
@@ -102,13 +102,13 @@ fmt:				db "%x%x%x", 10, 0
 section .text
 x87_ntop:
 	F_ENTER_DUMP fnsave
-	jmp .body
+	jmp x87_top.body
 x87_top:
 	F_ENTER_DUMP
 .body:
 
-	movzx cx, word [esp+4+DUMP.SW]
-	movzx ax, word [esp+4+DUMP.TW]
+	movzx ecx, word [esp+4+X87DUMP.SW]
+	movzx eax, word [esp+4+X87DUMP.TW]
 
 	shl cx, 10
 	and cl, 14

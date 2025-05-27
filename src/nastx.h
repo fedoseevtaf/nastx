@@ -1,8 +1,8 @@
-#ifndef NASTX87_H_SENTRY
-#define NASTX87_H_SENTRY
+#ifndef NASTX_H_SENTRY
+#define NASTX_H_SENTRY
 
 /*
- * nastx87 can be used as a C library, all the functions do use cdecl
+ * nastx can be used as a C library, all the functions do use cdecl
  */
 
 void
@@ -38,6 +38,6 @@ x87_inspect(void);
 void
 x87_ninspect(void);
 
-#endif /* NASTX87_H_SENTRY */
+#endif /* NASTX_H_SENTRY */
 
 
