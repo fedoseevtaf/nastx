@@ -7,7 +7,7 @@ nastx.o: nastx.asm
 	nasm $(ASM_OPTIONS) nastx.asm -o nastx.o 
 
 .PHONY: test
-test:
+test: nastx.o
 	./runtest.sh
 
 clean:
