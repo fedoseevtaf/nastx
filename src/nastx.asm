@@ -67,7 +67,7 @@ MAKE_OFFSET_TAB .R, .R, 12, 8
 
 %assign i 0
 %rep 8
-	F_TWORD_MEMCPY_ZX_TAB2TAB %1, SAVE.R, i, %1, X87DUMP.R, i
+	F_TWORD_MEMCPY_ZX_TAB2TAB %1, X87DUMP.R, i, %1, SAVE.R, i
 %assign i i+1
 %endrep
 %endmacro
@@ -94,7 +94,7 @@ MAKE_OFFSET_TAB .R, .R, 12, 8
 
 
 section .rodata
-fmt_stack_register_value:	db "|ST%u|%26.10|", 10, 0
+fmt_stack_register_value:	db "|ST%u|%26.10Lg|", 10, 0
 fmt_stack_register_empty:	db "|ST%u|                       ...|", 10, 0
 
 fmt:				db "%x%x%x", 10, 0
@@ -110,13 +110,15 @@ x87_top:
 	movzx ecx, word [esp+4+X87DUMP.SW]
 	movzx eax, word [esp+4+X87DUMP.TW]
 
-	shl cx, 10
+	shr cx, 10
 	and cl, 14
 	shr ax, cl
 	and al, 3
 	cmp al, 3
-	jz .print_empty
+	je .print_empty
 .print_value:
+	not cl
+	and cl, 14
 	shr ecx, 1
 	lea ecx, [ecx*2 + ecx]
 	F_TWORD_MEMCPY_ZX esp+8, esp+4 + (X87DUMP.R + ecx)
