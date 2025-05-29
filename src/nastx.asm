@@ -117,11 +117,7 @@ x87_top:
 	cmp al, 3
 	je .print_empty
 .print_value:
-	not cl
-	and cl, 14
-	shl ecx, 1
-	lea ecx, [ecx*2 + ecx]
-	F_TWORD_MEMCPY_ZX esp+8, esp+4 + (X87DUMP.R + ecx)
+	F_TWORD_MEMCPY_ZX esp+8, esp+4 + X87DUMP.R
 	mov dword [esp+4], 0
 	mov dword [esp], fmt_stack_register_value
 	call printf

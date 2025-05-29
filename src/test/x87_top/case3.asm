@@ -2,6 +2,10 @@
 TEST_BEGIN
 	fldpi
 	fst ST3
+
+	fld1
+	faddp
+
 	fdecstp
 	fdecstp
 	fdecstp

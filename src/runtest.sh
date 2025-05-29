@@ -25,7 +25,7 @@ cleardir() {
 TMPDIR=$(mktemp -d)
 TMPOUT=$(mktemp -p "$TMPDIR")
 TMPERR=$(mktemp -p "$TMPDIR")
-for FILE in $(find ./test -name '*.asm') ; do
+for FILE in $(find ./test -name '*.asm' | sort) ; do
 	BASE="$(basename "$FILE" .asm)"
 	DIR="$(dirname "$FILE")"
 	FILE="$DIR/$BASE"
