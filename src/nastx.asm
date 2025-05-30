@@ -112,12 +112,12 @@ x87_top:
 	F_ENTER_DUMP			;
 .body:
 	mov bx, word [esp+X87DUMP.TW]	; Rotate Tag Word in BX
-	mov cx, word [esp+X87DUMP.SW]	; so that least significant bits
-	shr cx, 10			; are tag of the ST0
-	and cl, 14			;
+	mov cx, word [esp+X87DUMP.SW]	; so that the least significant
+	shr cx, 10			; bits represent
+	and cl, 14			; the tag of the ST0
 	ror bx, cl			;
 
-	and bl, 3			; Check tag of ST0
+	and bl, 3			; Check tag of the ST0
 	cmp bl, 3			;
 	je .print_empty			;
 .print_value:
@@ -145,13 +145,15 @@ x87_nhead:
 x87_head:
 	F_ENTER_DUMP			;
 .body:
-	mov bx, word [esp + X87DUMP.TW]	;
-	mov cx, word [esp + X87DUMP.SW]	;
-	shr cx, 10			;
-	and cl, 14			;
+	mov bx, word [esp+X87DUMP.TW]	; Rotate Tag Word in BX
+	mov cx, word [esp+X87DUMP.SW]	; so that the least significant
+	shr cx, 10			; bits represent
+	and cl, 14			; the tag of the ST0
 	ror bx, cl			;
 
-	mov ecx, 7			;
+	mov ecx, 7			; Find the first non-empty
+					; register from the base
+					; of the register stack
 .loop1:
 	rol bx, 2			;
 	mov al, bl			;
@@ -161,15 +163,22 @@ x87_head:
 	loop .loop1			;
 .end1:
 
-	lea esi, [ecx*2 + ecx]		;
+	lea esi, [ecx*2 + ecx]		; Iterate over registers in the
+					; used part of the stack
+					; and print them
 	lea esi, [esi*4 + esp + X87DUMP.ST]
+					; esi points to the long double
+					; BX is a tag word rotated
+					; so that the least significant
+					; bits represent the tag
+					; of the current register
 	sub esp, 32			;
 	mov edi, ecx			;
 	inc edi				;
 .loop2:
 	dec edi				;
 
-	mov al, bl			;
+	mov al, bl			; Check current register tag
 	and al, 3			;
 	cmp al, 3			;
 	je .print_empty			;
