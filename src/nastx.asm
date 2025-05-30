@@ -1,10 +1,4 @@
-global x87_top, x87_head, x87_stack
-
-global x87_gist, x87_ngist
-global x87_about, x87_nabout
-
-global x87_inform, x87_ninform
-global x87_inspect, x87_ninspect
+%include "nastx.inc"
 
 extern printf
 
@@ -137,8 +131,16 @@ x87_top:
 	F_LEAVE_DUMP
 	ret
 
-x87_head:
 x87_nhead:
+	F_ENTER_DUMP fnsave
+	jmp x87_head.body
+x87_head:
+	F_ENTER_DUMP
+.body:
+	mov bx, word [esp + X87DUMP.TW]
+	F_LEAVE_DUMP
+	ret
+
 x87_stack:
 x87_nstack:
 x87_gist:
