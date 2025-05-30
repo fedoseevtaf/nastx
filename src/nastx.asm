@@ -27,16 +27,16 @@ extern printf
 .TW	equ 8
 .FIP	equ 12
 .FDP	equ 20
-.R	equ 28
-MAKE_OFFSET_TAB .R, .R, 10, 8
+.ST	equ 28
+MAKE_OFFSET_TAB .ST, .ST, 10, 8
 	endstruc
 
 	struc X87DUMP
 .CW	equ 0
 .SW	equ 4
 .TW	equ 8
-.R	equ 12
-MAKE_OFFSET_TAB .R, .R, 12, 8
+.ST	equ 12
+MAKE_OFFSET_TAB .ST, .ST, 12, 8
 .FIP	equ 108
 .FDP	equ 116
 	endstruc
@@ -67,7 +67,7 @@ MAKE_OFFSET_TAB .R, .R, 12, 8
 
 %assign i 0
 %rep 8
-	F_TWORD_MEMCPY_ZX_TAB2TAB %1, X87DUMP.R, i, %1, SAVE.R, i
+	F_TWORD_MEMCPY_ZX_TAB2TAB %1, X87DUMP.ST, i, %1, SAVE.ST, i
 %assign i i+1
 %endrep
 %endmacro
@@ -77,18 +77,20 @@ MAKE_OFFSET_TAB .R, .R, 12, 8
 	mov ebp, esp
 	push esi
 	push edi
-	sub esp, 128
+	push ebx
+	sub esp, 124
 %if %0 > 0
 	%1 [esp+4]
 %else
-	fsave [esp+4]
+	fsave [esp]
 %endif
-	F_EXPAND_SAVE_TO_X87DUMP esp+4
+	F_EXPAND_SAVE_TO_X87DUMP esp
 %endmacro
 
 %macro F_LEAVE_DUMP 0
 	mov edi, dword [ebp-8]
 	mov esi, dword [ebp-4]
+	mov ebx, dword [ebp-12]
 	leave
 %endmacro
 
@@ -107,8 +109,8 @@ x87_top:
 	F_ENTER_DUMP
 .body:
 
-	movzx ecx, word [esp+4+X87DUMP.SW]
-	movzx eax, word [esp+4+X87DUMP.TW]
+	movzx ecx, word [esp+X87DUMP.SW]
+	movzx eax, word [esp+X87DUMP.TW]
 
 	shr cx, 10
 	and cl, 14
@@ -117,7 +119,8 @@ x87_top:
 	cmp al, 3
 	je .print_empty
 .print_value:
-	F_TWORD_MEMCPY_ZX esp+8, esp+4 + X87DUMP.R
+	sub esp, 32
+	F_TWORD_MEMCPY_ZX esp+8, esp+32 + X87DUMP.ST0
 	mov dword [esp+4], 0
 	mov dword [esp], fmt_stack_register_value
 	call printf
@@ -126,6 +129,7 @@ x87_top:
 	ret
 
 .print_empty:
+	sub esp, 16
 	mov dword [esp+4], 0
 	mov dword [esp], fmt_stack_register_empty
 	call printf
