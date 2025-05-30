@@ -82,11 +82,13 @@ MAKE_OFFSET_TAB .ST, .ST, 12, 8
 	push edi
 	push ebx
 	sub esp, 124
+
 %if %0 > 0
 	%1 [esp+4]
 %else
 	fsave [esp]
 %endif
+
 	F_EXPAND_SAVE_TO_X87DUMP esp
 %endmacro
 
@@ -102,96 +104,93 @@ section .rodata
 fmt_stack_register_value:	db "|ST%u|%26.10Lg|", 10, 0
 fmt_stack_register_empty:	db "|ST%u|                       ...|", 10, 0
 
-fmt:				db "%x%x%x", 10, 0
-
 section .text
 x87_ntop:
-	F_ENTER_DUMP fnsave
-	jmp x87_top.body
+	F_ENTER_DUMP fnsave		;
+	jmp x87_top.body		;
 x87_top:
-	F_ENTER_DUMP
+	F_ENTER_DUMP			;
 .body:
+	mov bx, word [esp+X87DUMP.TW]	; Rotate Tag Word in BX
+	mov cx, word [esp+X87DUMP.SW]	; so that least significant bits
+	shr cx, 10			; are tag of the ST0
+	and cl, 14			;
+	ror bx, cl			;
 
-	movzx ecx, word [esp+X87DUMP.SW]
-	movzx eax, word [esp+X87DUMP.TW]
-
-	shr cx, 10
-	and cl, 14
-	shr ax, cl
-	and al, 3
-	cmp al, 3
-	je .print_empty
+	and bl, 3			; Check tag of ST0
+	cmp bl, 3			;
+	je .print_empty			;
 .print_value:
-	sub esp, 32
-	F_TWORD_MEMCPY_ZX esp+8, esp+32 + X87DUMP.ST0
-	mov dword [esp+4], 0
+	sub esp, 32			;
+	F_LONG_DOUBLE_MEMCPY esp+8, esp+32 + X87DUMP.ST0
+	mov dword [esp+4], 0		;
 	mov dword [esp], fmt_stack_register_value
-	call printf
+	call printf			;
 
-	F_LEAVE_DUMP
-	ret
+	F_LEAVE_DUMP			;
+	ret				;
 
 .print_empty:
-	sub esp, 16
-	mov dword [esp+4], 0
+	sub esp, 16			;
+	mov dword [esp+4], 0		;
 	mov dword [esp], fmt_stack_register_empty
-	call printf
+	call printf			;
 
-	F_LEAVE_DUMP
-	ret
+	F_LEAVE_DUMP			;
+	ret				;
 
 x87_nhead:
-	F_ENTER_DUMP fnsave
-	jmp x87_head.body
+	F_ENTER_DUMP fnsave		;
+	jmp x87_head.body		;
 x87_head:
-	F_ENTER_DUMP
+	F_ENTER_DUMP			;
 .body:
-	mov bx, word [esp + X87DUMP.TW]
-	mov cx, word [esp + X87DUMP.SW]
-	shr cx, 10
-	and cl, 14
-	ror bx, cl
+	mov bx, word [esp + X87DUMP.TW]	;
+	mov cx, word [esp + X87DUMP.SW]	;
+	shr cx, 10			;
+	and cl, 14			;
+	ror bx, cl			;
 
-	mov ecx, 7
+	mov ecx, 7			;
 .loop1:
-	rol bx, 2
-	mov al, bl
-	and al, 3
-	cmp al, 3
-	jne .end1
-	loop .loop1
+	rol bx, 2			;
+	mov al, bl			;
+	and al, 3			;
+	cmp al, 3			;
+	jne .end1			;
+	loop .loop1			;
 .end1:
 
-	lea esi, [ecx*2 + ecx]
+	lea esi, [ecx*2 + ecx]		;
 	lea esi, [esi*4 + esp + X87DUMP.ST]
-	sub esp, 32
-	mov edi, ecx
-	inc edi
+	sub esp, 32			;
+	mov edi, ecx			;
+	inc edi				;
 .loop2:
-	dec edi
+	dec edi				;
 
-	mov al, bl
-	and al, 3
-	cmp al, 3
-	je .print_empty
+	mov al, bl			;
+	and al, 3			;
+	cmp al, 3			;
+	je .print_empty			;
 .print_value:
-	F_LONG_DOUBLE_MEMCPY esp+8, esi
-	mov dword [esp+4], edi
+	F_LONG_DOUBLE_MEMCPY esp+8, esi	;
+	mov dword [esp+4], edi		;
 	mov dword [esp], fmt_stack_register_value
-	call printf
-	jmp .continue
+	call printf			;
+	jmp .continue			;
 .print_empty:
-	mov dword [esp+4], edi
+	mov dword [esp+4], edi		;
 	mov dword [esp], fmt_stack_register_empty
-	call printf
+	call printf			;
 .continue:
-	rol bx, 2
-	sub esi, 12
-	test edi, edi
-	jnz .loop2
+	rol bx, 2			;
+	sub esi, 12			;
+	test edi, edi			;
+	jnz .loop2			;
 .end2:
-	F_LEAVE_DUMP
-	ret
+	F_LEAVE_DUMP			;
+	ret				;
 
 x87_stack:
 x87_nstack:
