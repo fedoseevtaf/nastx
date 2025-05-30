@@ -44,6 +44,15 @@ MAKE_OFFSET_TAB .ST, .ST, 12, 8
 	mov dword [%1 + 8], eax
 %endmacro
 
+%macro F_LONG_DOUBLE_MEMCPY 2
+	mov eax, dword [%2]
+	mov dword [%1], eax
+	mov eax, dword [%2 + 4]
+	mov dword [%1 + 4], eax
+	mov eax, dword [%2 + 8]
+	mov dword [%1 + 8], eax
+%endmacro
+
 %macro F_TWORD_MEMCPY_ZX_TAB2TAB 6
 	F_TWORD_MEMCPY_ZX %1 + %2%3, %4 + %5%6
 %endmacro
@@ -138,6 +147,49 @@ x87_head:
 	F_ENTER_DUMP
 .body:
 	mov bx, word [esp + X87DUMP.TW]
+	mov cx, word [esp + X87DUMP.SW]
+	shr cx, 10
+	and cl, 14
+	ror bx, cl
+
+	mov ecx, 7
+.loop1:
+	rol bx, 2
+	mov al, bl
+	and al, 3
+	cmp al, 3
+	jne .end1
+	loop .loop1
+.end1:
+
+	lea esi, [ecx*2 + ecx]
+	lea esi, [esi*4 + esp + X87DUMP.ST]
+	sub esp, 32
+	mov edi, ecx
+	inc edi
+.loop2:
+	dec edi
+
+	mov al, bl
+	and al, 3
+	cmp al, 3
+	je .print_empty
+.print_value:
+	F_LONG_DOUBLE_MEMCPY esp+8, esi
+	mov dword [esp+4], edi
+	mov dword [esp], fmt_stack_register_value
+	call printf
+	jmp .continue
+.print_empty:
+	mov dword [esp+4], edi
+	mov dword [esp], fmt_stack_register_empty
+	call printf
+.continue:
+	rol bx, 2
+	sub esi, 12
+	test edi, edi
+	jnz .loop2
+.end2:
 	F_LEAVE_DUMP
 	ret
 
