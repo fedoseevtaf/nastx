@@ -201,8 +201,47 @@ x87_head:
 	F_LEAVE_DUMP			;
 	ret				;
 
-x87_stack:
 x87_nstack:
+	F_ENTER_DUMP fnsave
+	jmp x87_stack.body
+x87_stack:
+	F_ENTER_DUMP
+.body:
+	mov bx, word [esp+X87DUMP.TW]
+	mov si, word [esp+X87DUMP.SW]
+	shr si, 11
+	neg si
+
+	sub esp, 32
+	mov edi, 8
+.loop:
+	dec si
+	and esi, 7
+	rol bx, 2
+
+	mov al, bl
+	and al, 3
+	cmp al, 3
+	je .print_empty
+.print_value:
+	lea ecx, [esi*2 + esi]
+	lea ecx, [ecx*4]
+	F_LONG_DOUBLE_MEMCPY esp+8, esp+32 + X87DUMP.ST + ecx
+	mov dword [esp+4], esi
+	mov dword [esp], fmt_stack_register_value
+	call printf
+	jmp .continue
+.print_empty:
+	mov dword [esp+4], esi
+	mov dword [esp], fmt_stack_register_empty
+	call printf
+.continue:
+	dec edi
+	jnz .loop
+.end:
+	F_LEAVE_DUMP
+	ret
+
 x87_gist:
 x87_ngist:
 x87_about:
