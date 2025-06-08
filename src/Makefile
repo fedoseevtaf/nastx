@@ -22,6 +22,15 @@ endif
 	install -b -D -t "$(PREFIX)/lib" libnastx.a
 	install -b -D -t "$(PREFIX)/include" nastx.inc nastx.h
 
+.PHONY: uninstall
+uninstall:
+ifndef PREFIX
+	$(error Set the PREFIX variable e.g. PREFIX=/usr )
+endif
+	rm "$(PREFIX)/lib/libnastx.a" \
+		"$(PREFIX)/include/nastx.inc"
+		"$(PREFIX)/include/nastx.h"
+
 .PHONY: clean
 clean:
 	rm libnastx.a
