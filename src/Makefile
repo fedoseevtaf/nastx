@@ -14,21 +14,21 @@ nastx.o: nastx.asm
 test: nastx.o
 	./runtest.sh
 
-.PHONY: install
-install: libnastx.a
+.PHONY: _require_PREFIX
+_require_PREFIX:
 ifndef PREFIX
 	$(error Set the PREFIX variable e.g. PREFIX=/usr )
 endif
+
+.PHONY: install
+install: libnastx.a _require_PREFIX
 	install -b -D -t "$(PREFIX)/lib" libnastx.a
 	install -b -D -t "$(PREFIX)/include" nastx.inc nastx.h
 
 .PHONY: uninstall
-uninstall:
-ifndef PREFIX
-	$(error Set the PREFIX variable e.g. PREFIX=/usr )
-endif
+uninstall: _require_PREFIX
 	rm "$(PREFIX)/lib/libnastx.a" \
-		"$(PREFIX)/include/nastx.inc"
+		"$(PREFIX)/include/nastx.inc" \
 		"$(PREFIX)/include/nastx.h"
 
 .PHONY: clean
