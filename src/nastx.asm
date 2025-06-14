@@ -124,7 +124,8 @@ x87_top:
 	sub esp, 32			;
 	F_LONG_DOUBLE_MEMCPY esp+8, esp+32 + X87DUMP.ST0
 	mov dword [esp+4], 0		;
-	mov dword [esp], fmt_stack_register_value
+	lea eax, [rel fmt_stack_register_value]
+	mov dword [esp], eax		;
 	call printf			;
 
 	F_LEAVE_DUMP			;
@@ -133,7 +134,8 @@ x87_top:
 .print_empty:
 	sub esp, 16			;
 	mov dword [esp+4], 0		;
-	mov dword [esp], fmt_stack_register_empty
+	lea eax, [rel fmt_stack_register_empty]
+	mov dword [esp], eax		;
 	call printf			;
 
 	F_LEAVE_DUMP			;
@@ -185,12 +187,14 @@ x87_head:
 .print_value:
 	F_LONG_DOUBLE_MEMCPY esp+8, esi	;
 	mov dword [esp+4], edi		;
-	mov dword [esp], fmt_stack_register_value
+	lea eax, [rel fmt_stack_register_value]
+	mov dword [esp], eax		;
 	call printf			;
 	jmp .continue			;
 .print_empty:
 	mov dword [esp+4], edi		;
-	mov dword [esp], fmt_stack_register_empty
+	lea eax, [rel fmt_stack_register_empty]
+	mov dword [esp], eax		;
 	call printf			;
 .continue:
 	rol bx, 2			;
@@ -228,13 +232,15 @@ x87_stack:
 	lea ecx, [ecx*4]
 	F_LONG_DOUBLE_MEMCPY esp+8, esp+32 + X87DUMP.ST + ecx
 	mov dword [esp+4], esi
-	mov dword [esp], fmt_stack_register_value
-	call printf
+	lea eax, [rel fmt_stack_register_value]
+	mov dword [esp], eax		;
+	call printf			;
 	jmp .continue
 .print_empty:
 	mov dword [esp+4], esi
-	mov dword [esp], fmt_stack_register_empty
-	call printf
+	lea eax, [rel fmt_stack_register_empty]
+	mov dword [esp], eax		;
+	call printf			;
 .continue:
 	dec edi
 	jnz .loop
